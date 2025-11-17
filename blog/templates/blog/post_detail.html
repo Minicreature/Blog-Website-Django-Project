@@ -1,0 +1,9 @@
+{% extends "blog/base.html" %}
+{% block content %}
+  <div class="card">
+    <h1>{{ object.title }}</h1>
+    <div class="meta">By {{ object.author }} • {{ object.date_posted|date:"M d, Y H:i" }}</div>
+    <div style="margin-top:12px; white-space:pre-wrap;">{{ object.content }}</div>
+    <p style="margin-top:16px;"><a href="{% url 'blog-home' %}">← Back to all posts</a></p>
+  </div>
+{% endblock %}
