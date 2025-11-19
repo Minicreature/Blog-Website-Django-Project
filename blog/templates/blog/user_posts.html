@@ -1,0 +1,15 @@
+{% extends "blog/base.html" %}
+{% block content %}
+  <h1 style="margin-top:14px;">Posts by {{ view.kwargs.username }}</h1>
+
+  {% for post in posts %}
+    <div class="card">
+      <h2>{{ post.title }}</h2>
+      <div class="meta">Posted {{ post.date_posted|date:"M d, Y H:i" }}</div>
+      <p>{{ post.content|truncatechars:200 }}</p>
+      <a href="{% url 'post-detail' post.pk %}">Read more →</a>
+    </div>
+  {% empty %}
+    <div class="card">No posts by this user.</div>
+  {% endfor %}
+{% endblock %}
