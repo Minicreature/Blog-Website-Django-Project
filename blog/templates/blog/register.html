@@ -1,0 +1,35 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<div class="content-section" style="max-width: 600px; margin: 0 auto;">
+    <div class="card">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">Join Today</h2>
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" type="submit">Sign Up</button>
+                </div>
+            </form>
+            <div class="border-top pt-3 mt-3 text-center">
+                <small class="text-muted">
+                    Already have an account? <a class="ml-2" href="{% url 'login' %}">Sign In</a>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

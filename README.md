@@ -11,6 +11,7 @@ A simple Django blog built iteratively to demonstrate a clean development & rele
 - **v2.0.0 — 2025-11-18** — Views & templates: post listing (home) & post detail.
 - **v3.0.0 — 2025-11-18** — CRUD: create/update/delete posts, admin, auth.
 - **v4.0.0 — 2025-11-18** — Styling (static CSS) and user-specific post listing.
+- **v5.0.0 — 2025-12-04** — Social features (Like/Comment/Share), Inline editing, Public access.
 
 ## Quick run (local)
 1. **Clone:**
@@ -45,4 +46,4 @@ A simple Django blog built iteratively to demonstrate a clean development & rele
 
 ## Notes:
 - Do not commit venv/ or db.sqlite3 — they are in .gitignore.
-- Tags: v1.0.0, v2.0.0, v3.0.0, v4.0.0.
+- Tags: v1.0.0, v2.0.0, v3.0.0, v4.0.0, v5.0.0.

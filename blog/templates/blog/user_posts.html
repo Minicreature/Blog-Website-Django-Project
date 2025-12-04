@@ -1,15 +1,80 @@
 {% extends "blog/base.html" %}
 {% block content %}
-  <h1 style="margin-top:14px;">Posts by {{ view.kwargs.username }}</h1>
 
+<div style="text-align: center; margin-bottom: 4rem;">
+  <h1 style="font-size: 3rem; margin-bottom: 1rem;">
+    Posts by <span style="color: var(--primary);">{{ view.kwargs.username }}</span>
+  </h1>
+  <p style="color: var(--text-muted); font-size: 1.2rem;">
+    {{ page_obj.paginator.count }} stories published
+  </p>
+</div>
+
+<div class="post-grid">
   {% for post in posts %}
-    <div class="card">
-      <h2>{{ post.title }}</h2>
-      <div class="meta">Posted {{ post.date_posted|date:"M d, Y H:i" }}</div>
-      <p>{{ post.content|truncatechars:200 }}</p>
-      <a href="{% url 'post-detail' post.pk %}">Read more →</a>
+  <article class="card">
+    <div class="card-body">
+      <div class="card-meta">
+        <img class="author-img" src="{{ post.author.profile.avatar_url }}" alt="{{ post.author.username }}">
+        <a href="{% url 'user-posts' post.author.username %}" class="link-subtle">{{ post.author.username }}</a>
+        <span>&bull;</span>
+        <span>{{ post.date_posted|date:"F d, Y" }}</span>
+        {% if post.category %}
+        <span class="category-tag">{{ post.category.name }}</span>
+        {% endif %}
+      </div>
+
+      <h2 class="card-title">
+        <a href="{% url 'post-detail' post.id %}">{{ post.title }}</a>
+      </h2>
+
+      <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+
+      <div class="post-actions">
+        <form action="{% url 'like_post' post.pk %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="post_id" value="{{ post.id }}">
+          <button type="submit" class="btn-action {% if user in post.likes.all %}active{% endif %}">
+            <i class="{% if user in post.likes.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+            <span>{{ post.likes.count }}</span>
+          </button>
+        </form>
+        <a href="{% url 'post-detail' post.id %}" class="btn-action">
+          <i class="fa-regular fa-comment"></i>
+          <span>{{ post.comments.count }}</span>
+        </a>
+        <button class="btn-action"
+          onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'post-detail' post.id %}'); alert('Link copied!');">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+      </div>
     </div>
+  </article>
   {% empty %}
-    <div class="card">No posts by this user.</div>
+  <p>No posts found.</p>
   {% endfor %}
-{% endblock %}
+</div>
+
+{% if is_paginated %}
+<div class="pagination" style="margin-top: 3rem; display: flex; justify-content: center; gap: 0.5rem;">
+  {% if page_obj.has_previous %}
+  <a class="btn btn-outline" href="?page=1">First</a>
+  <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+  {% if page_obj.number == num %}
+  <a class="btn btn-primary" href="?page={{ num }}">{{ num }}</a>
+  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a class="btn btn-outline"
+    href="?page={{ num }}">{{ num }}</a>
+    {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+    <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}">Next</a>
+    <a class="btn btn-outline" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock content %}

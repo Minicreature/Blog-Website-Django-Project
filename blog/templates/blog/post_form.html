@@ -1,15 +1,31 @@
 {% extends "blog/base.html" %}
 {% block content %}
-  <div class="card">
-    {% if object %}<h2>Edit Post{% else %}<h2>Create Post{% endif %}</h2>
+<div class="content-section" style="max-width: 800px; margin: 0 auto;">
+  <h2 class="text-center mb-4">{% if object %}Edit Post{% else %}Create Post{% endif %}</h2>
 
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit" style="padding:8px 12px; border-radius:6px; background:#2f80ed; color:white; border:none;">
-        {% if object %}Update{% else %}Create{% endif %}
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.help_text %}
+        <small class="form-text text-muted">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+      <a href="{% url 'blog-home' %}" class="btn btn-outline me-md-2">Cancel</a>
+      <button class="btn btn-primary" type="submit">
+        {% if object %}Update Post{% else %}Publish Post{% endif %}
       </button>
-      <a href="{% url 'blog-home' %}" style="margin-left:8px;">Cancel</a>
-    </form>
-  </div>
-{% endblock %}
+    </div>
+  </form>
+</div>
+{% endblock content %}

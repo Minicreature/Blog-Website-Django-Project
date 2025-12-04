@@ -1,30 +1,130 @@
 {% extends "blog/base.html" %}
 {% block content %}
-  <h1 style="margin-top:14px;">Latest Posts</h1>
 
-  {% if posts %}
-    {% for post in posts %}
-      <div class="card">
-        <h2>{{ post.title }}</h2>
-        <div class="meta">By {{ post.author }} • {{ post.date_posted|date:"M d, Y H:i" }}</div>
-        <p>{{ post.content|truncatechars:200 }}</p>
-        <a class="read-more" href="{% url 'post-detail' post.pk %}">Read more →</a>
+<!-- Hero Section -->
+<div class="hero">
+  <h1>Welcome to blogiies</h1>
+  <p>Learning grows, when shared</p>
+  {% if user.is_authenticated %}
+  <a href="{% url 'post-create' %}" class="btn btn-primary">Start Writing</a>
+  {% else %}
+  <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+    <a href="{% url 'register' %}" class="btn btn-primary">Join Today</a>
+    <a href="{% url 'login' %}" class="btn btn-outline">Login</a>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Page Title for Search/Category/User -->
+{% if request.GET.q %}
+<h2 class="mb-4">Search Results for "{{ request.GET.q }}"</h2>
+{% elif request.resolver_match.url_name == 'category-posts' %}
+<h2 class="mb-4">Category: {{ view.kwargs.category }}</h2>
+{% elif request.resolver_match.url_name == 'user-posts' %}
+<h2 class="mb-4">Posts by {{ view.kwargs.username }}</h2>
+{% endif %}
+
+<!-- Post Grid -->
+<div class="post-grid">
+  {% for post in posts %}
+  <article class="card">
+    <div class="card-body">
+      <div class="card-meta">
+        <img class="author-img" src="{{ post.author.profile.avatar_url }}" alt="{{ post.author.username }}">
+        <a href="{% url 'user-posts' post.author.username %}" class="link-subtle">{{ post.author.username }}</a>
+        <span>&bull;</span>
+        <span>{{ post.date_posted|date:"F d, Y" }}</span>
+        {% if post.category %}
+        <span class="category-tag">{{ post.category.name }}</span>
+        {% endif %}
       </div>
+
+      <h2 class="card-title">
+        <a href="{% url 'post-detail' post.id %}">{{ post.title }}</a>
+      </h2>
+
+      <p class="card-text">{{ post.content|truncatewords:30 }}</p>
+
+      <div class="post-actions">
+        <form action="{% url 'like_post' post.pk %}" method="POST">
+          {% csrf_token %}
+          <input type="hidden" name="post_id" value="{{ post.id }}">
+          <button type="submit" class="btn-action {% if user in post.likes.all %}active{% endif %}">
+            <i class="{% if user in post.likes.all %}fa-solid{% else %}fa-regular{% endif %} fa-heart"></i>
+            <span>{{ post.likes.count }}</span>
+          </button>
+        </form>
+        <a href="{% url 'post-detail' post.id %}" class="btn-action">
+          <i class="fa-regular fa-comment"></i>
+          <span>{{ post.comments.count }}</span>
+        </a>
+        <button class="btn-action"
+          onclick="navigator.clipboard.writeText('{{ request.scheme }}://{{ request.get_host }}{% url 'post-detail' post.id %}'); alert('Link copied!');">
+          <i class="fa-solid fa-share-nodes"></i>
+        </button>
+      </div>
+    </div>
+  </article>
+  {% empty %}
+  <p>No posts found.</p>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="pagination" style="margin-top: 3rem; display: flex; justify-content: center; gap: 0.5rem;">
+  {% if page_obj.has_previous %}
+  <a class="btn btn-outline" href="?page=1">First</a>
+  <a class="btn btn-outline" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+  {% if page_obj.number == num %}
+  <a class="btn btn-primary" href="?page={{ num }}">{{ num }}</a>
+  {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a class="btn btn-outline"
+    href="?page={{ num }}">{{ num }}</a>
+    {% endif %}
     {% endfor %}
 
-    {% if is_paginated %}
-      <div style="text-align:center; margin:16px 0;">
-        {% if page_obj.has_previous %}
-          <a href="?page={{ page_obj.previous_page_number }}">« Prev</a>
-        {% endif %}
-        <span style="margin:0 8px;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-        {% if page_obj.has_next %}
-          <a href="?page={{ page_obj.next_page_number }}">Next »</a>
-        {% endif %}
-      </div>
+    {% if page_obj.has_next %}
+    <a class="btn btn-outline" href="?page={{ page_obj.next_page_number }}">Next</a>
+    <a class="btn btn-outline" href="?page={{ page_obj.paginator.num_pages }}">Last</a>
     {% endif %}
+</div>
+{% endif %}
 
-  {% else %}
-    <div class="card">No posts yet. Create some via the admin panel.</div>
-  {% endif %}
-{% endblock %}
+<!-- Why blogiies? Section -->
+<div class="container" style="margin-top: 6rem; border-top: 1px solid var(--border); padding-top: 4rem;">
+  <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem;">Why blogiies?</h2>
+  <div class="post-grid">
+    <div class="card" style="text-align: center; padding: 2rem;">
+      <div class="card-body">
+        <i class="fa-solid fa-pen-nib" style="font-size: 3rem; color: var(--primary); margin-bottom: 1.5rem;"></i>
+        <h3 style="margin-bottom: 1rem;">Share Your Thoughts</h3>
+        <p style="color: var(--text-muted);">Express yourself freely. Write about what you love, what you know,
+          and what
+          matters to you.</p>
+      </div>
+    </div>
+    <div class="card" style="text-align: center; padding: 2rem;">
+      <div class="card-body">
+        <i class="fa-solid fa-users" style="font-size: 3rem; color: var(--secondary); margin-bottom: 1.5rem;"></i>
+        <h3 style="margin-bottom: 1rem;">Connect with Others</h3>
+        <p style="color: var(--text-muted);">Join a vibrant community of writers and readers. Comment, discuss,
+          and grow
+          together.</p>
+      </div>
+    </div>
+    <div class="card" style="text-align: center; padding: 2rem;">
+      <div class="card-body">
+        <i class="fa-solid fa-book-open" style="font-size: 3rem; color: #10b981; margin-bottom: 1.5rem;"></i>
+        <h3 style="margin-bottom: 1rem;">Discover Stories</h3>
+        <p style="color: var(--text-muted);">Explore a world of ideas. Find new perspectives and get inspired by
+          amazing
+          content.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}

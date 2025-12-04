@@ -1,5 +1,13 @@
 # Changelog
 
+## [v5.0.0] - 2025-12-04
+### Added
+- Social interaction features: Like, Comment, and Share buttons.
+- Inline comment editing and deletion.
+- Public access for guests (view posts and search).
+- Updated tagline to "Learning grows, when shared".
+- UI refinements and consistent styling.
+
 ## [v4.0.0] - 2025-11-18
 ### Added
 - Static CSS and improved base layout.
